@@ -27,19 +27,13 @@ const messageSchema = new mongoose.Schema(
       type: String,
       enum: ['text', 'image', 'text+image'],
       default: 'text',
-    },
-    isReadBy: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      }
-    ],
+    }
   },
   {
     timestamps: true,
   }
 );
 
-const Message = mongoose.model('Message', messageSchema);
+const MessageModal = mongoose.model('Message', messageSchema);
 
-export default Message;
+export default MessageModal;

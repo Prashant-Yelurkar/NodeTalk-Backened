@@ -39,7 +39,6 @@ const chatSchema = new mongoose.Schema({
 });
 
 chatSchema.index(
-  { members: 1, isGroup: 1 },
   {
     unique: true,
     partialFilterExpression: { isGroup: false } 

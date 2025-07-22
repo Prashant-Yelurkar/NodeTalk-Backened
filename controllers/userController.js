@@ -1,5 +1,5 @@
 import User from "../model/userModel.js";
-import Chat from '../model/chatModel.js';
+import chatModel from "../model/chatModel.js";
 
 const getAllUsers = async (req, res) => {
   try {
@@ -27,17 +27,19 @@ const getAllUsers = async (req, res) => {
     // Check for existing 1-1 chats for each user
     const usersWithChat = await Promise.all(
       users.map(async (user) => {
-        const chat = await Chat.findOne({
+        const chat = await chatModel.findOne({
           isGroup: false,
-          participants: { $all: [currentUserId, user._id], $size: 2 },
+          members: { $all: [currentUserId, user._id], $size: 2 },
         }).select('_id');
 
         return {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          profile: user.profile,
-          chatId: chat ? chat._id : null,
+            chatId: chat ? chat._id : null,
+            user :{
+                _id: user._id,
+              name: user.name,
+              email: user.email,
+              profile: user.profile,
+            }
         };
       })
     );
@@ -60,36 +62,9 @@ const getAllUsers = async (req, res) => {
 
 
 
-const getMyConnections = async (req, res) => {  
-  try {
-    const myUserId = req.user.id; 
-    const chats = await Chat.find({ members: myUserId }).select('members');
-
-    const connectedUserIds = new Set();
-    chats.forEach(chat => {
-      chat.members.forEach(id => {
-        if (id.toString() !== myUserId.toString()) {
-          connectedUserIds.add(id.toString());
-        }
-      });
-    });
-
-    const userIdsArray = Array.from(connectedUserIds);
-
-    const users = await User.find({ _id: { $in: userIdsArray } })
-      .select('name email profile');
-
-    res.status(200).json({ success: true, data:users });
-  } catch (err) {
-    console.error('Error getting connected users:', err.message);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
 
 const getUserById = async (req, res) => {
     const userId = req.params.id;
-
     try {
         let user = await User.findById(userId).select('name email profile');
 
@@ -111,4 +86,4 @@ const getUserById = async (req, res) => {
 };
 
 
-export { getAllUsers ,getMyConnections, getUserById };
+export { getAllUsers , getUserById };
