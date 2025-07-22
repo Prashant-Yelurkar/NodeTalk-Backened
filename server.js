@@ -1,10 +1,10 @@
 import express, { json } from 'express';
-import dotenv from 'dotenv';
-import CORS from 'cors';
+// import dotenv from 'dotenv';
+// import CORS from 'cors';
 import connectDB from './db/connect.js';
-import { Server as SocketIO } from 'socket.io';
-import http from 'http';
-dotenv.config();
+// import { Server as SocketIO } from 'socket.io';
+// import http from 'http';
+// dotenv.config();
 
 
 const app = express();
