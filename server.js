@@ -22,13 +22,15 @@ const io = new SocketIO(server, {
 
 
 
-app.use(CORS({
-  origin:  process.env.NODE_ENV === "development"
-    ? process.env.APP_PRODUCTION_LINK
-    : process.env.APP_PRODUCTION_LINK,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+// app.use(CORS({
+//   origin:  process.env.NODE_ENV === "development"
+//     ? process.env.APP_PRODUCTION_LINK
+//     : process.env.APP_PRODUCTION_LINK,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// }));
+
+app.use(CORS())
 
 
 // Middleware
