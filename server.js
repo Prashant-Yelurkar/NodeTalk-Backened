@@ -139,6 +139,9 @@ app.get('/', (req, res) => {
 //   }
 // });
 
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
 
 const connection = async()=>{
     try{
@@ -155,5 +158,5 @@ const connection = async()=>{
     }; 
 }
 
-connection()
+// connection()
 
