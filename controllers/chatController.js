@@ -37,7 +37,7 @@ const getChatMessage = async (req, res) => {
   try {
     const chat_id = req.params.chat_id;
 
-    const messages = await MessageModal.find({ chatId: chat_id }).sort({ createdAt: 1 }); // sorted by time (optional)
+    const messages = await MessageModal.find({ chatId: chat_id }).sort({ createdAt: 1 });
 
     if (!messages || messages.length === 0) {
       return res.status(200).json({ success: false, message: "No messages found." });
