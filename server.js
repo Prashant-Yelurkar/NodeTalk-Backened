@@ -22,13 +22,13 @@ const port = process.env.PORT || 3000;
 
 
 
-app.use(CORS({
-  origin:  process.env.NODE_ENV === "development"
-    ? process.env.APP_DEVELOPMENT_LINK
-    : process.env.APP_PRODUCTION_LINK,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+// app.use(CORS({
+//   origin:  process.env.NODE_ENV === "development"
+//     ? process.env.APP_DEVELOPMENT_LINK
+//     : process.env.APP_PRODUCTION_LINK,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// }));
 
 
 // Middleware
