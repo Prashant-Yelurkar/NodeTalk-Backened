@@ -38,6 +38,18 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the NodeTalk backend!' , status:200, appName: process.env.APP_NAME || 'NodeTalk' , time: new Date().toISOString() });
 });
 
+import authRoute from './auth/authRoute.js';
+import useRoute from './routes/userRoute.js'
+import authenticateToken from './auth/authMiddleware.js';
+import chatRoute from './routes/chatRoute.js'
+import { validateToken } from './auth/authController.js';
+import User from './model/userModel.js';
+import MessageModal from './model/messsageModel.js';
+import chatModel from './model/chatModel.js';
+app.use('/auth', authRoute);
+app.use('/user', authenticateToken  ,useRoute )
+app.use('/chat',authenticateToken, chatRoute)
+
 
 const connection = async()=>{
     try{
