@@ -50,6 +50,91 @@ app.use('/auth', authRoute);
 app.use('/user', authenticateToken  ,useRoute )
 app.use('/chat',authenticateToken, chatRoute)
 
+const ActiveUser =new  Map();
+io.on('connection', async (socket) => {
+  const token = socket.handshake.auth.token;
+  try {
+    const decodedUser = validateToken(token);
+    const user = await User.findOne({ email: decodedUser.email });
+    if (!user) return;
+    ActiveUser.set(decodedUser.id.toString() , socket.id )
+    user.isOnline = true;
+    await user.save();
+
+    console.log(`🔌 User connected: ${socket.id}`);
+
+    socket.on('message', async (data) => {
+        try {
+            const senderId = validateToken(socket.handshake.auth.token).id;
+            const { chatId, userId, message } = data;
+            console.log(userId , senderId);
+    
+
+            let chat;
+
+            if (chatId) {
+                chat = await chatModel.findById(chatId);
+            }
+
+
+            if (!chat) {
+                const members = [senderId, userId].sort(); 
+                chat = await chatModel.findOne({
+                    members: members,
+                    isGroup: false
+                });
+                if (!chat) {
+                    chat = new chatModel({
+                    members: members,
+                    isGroup: false,
+                    lastMessage: message.text
+                    });
+
+                    await chat.save(); 
+                }
+            }
+            
+                chat.lastMessage = message.text;
+                await chat.save();
+
+                const newMessage = new MessageModal({
+                    chatId: chat._id,
+                    sender: senderId,
+                    text: message.text,
+                    type: message.type
+                });
+
+                await newMessage.save();
+                const receiverSocketId = ActiveUser.get(userId);
+                console.log(receiverSocketId);
+                
+                if(receiverSocketId)
+                    {
+                        io.to(receiverSocketId).emit("receiveMessage", {
+                            chatId:chat?._id,
+                            message:{...message, sender:senderId},
+                        });
+                    }
+            } catch (error) {
+                console.error('Message error:', error);
+            }
+            });
+
+
+    socket.on('disconnect', async () => {
+      console.log(`❌ User disconnected: ${socket.id}`);
+      user.isOnline = false;
+      user.lastActive = new Date()
+      await user.save();
+      ActiveUser.delete(user._id.toString());
+    });
+
+  } catch (error) {
+    console.error('Socket auth error:', error.message);
+    socket.disconnect(); 
+  }
+});
+
 
 const connection = async()=>{
     try{
