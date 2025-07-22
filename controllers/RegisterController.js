@@ -66,15 +66,19 @@ const register = async (data, res, isManual) => {
       await welcomeEmail({ to: user.email });
       return res.status(200).json({
         success: true,
+     
         message: '✅ Registration Successful',
         jwt: appJWT,
+       
       });
     } else {
       await loginEmail({ to: user.email });
       return res.status(200).json({
         success: true,
-        message: '✅ Login Successful',
-        jwt: appJWT,
+    
+          message: '✅ Login Successful',
+          jwt: appJWT,
+     
       });
     }
   } catch (error) {

@@ -44,7 +44,7 @@ const getAllUsers = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      users: usersWithChat,
+      data: usersWithChat,
       page,
       limit,
     });
@@ -60,11 +60,9 @@ const getAllUsers = async (req, res) => {
 
 
 
-const getMyConnections = async (req, res) => {
+const getMyConnections = async (req, res) => {  
   try {
     const myUserId = req.user.id; 
-
-   
     const chats = await Chat.find({ members: myUserId }).select('members');
 
     const connectedUserIds = new Set();
@@ -81,7 +79,7 @@ const getMyConnections = async (req, res) => {
     const users = await User.find({ _id: { $in: userIdsArray } })
       .select('name email profile');
 
-    res.status(200).json({ success: true, users });
+    res.status(200).json({ success: true, data:users });
   } catch (err) {
     console.error('Error getting connected users:', err.message);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -89,18 +87,28 @@ const getMyConnections = async (req, res) => {
 };
 
 
-const getUserById = async(req, res)=>{
+const getUserById = async (req, res) => {
     const userId = req.params.id;
 
-    let user = await User.findById(userId).select('name email profile')
-    console.log(user);
-    
-    if(user)
-        res.status(200).json({success:true , data:user})
-    else
-         res.status(200).json({success:false , message:"User Not Found"})
-        
-    
-}
+    try {
+        let user = await User.findById(userId).select('name email profile');
+
+        if (user) {
+            const userData = {
+                id: user._id, 
+                name: user.name,
+                email: user.email,
+                profile: user.profile
+            };
+
+            res.status(200).json({ success: true, data: userData });
+        } else {
+            res.status(404).json({ success: false, message: "User Not Found" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+    }
+};
+
 
 export { getAllUsers ,getMyConnections, getUserById };

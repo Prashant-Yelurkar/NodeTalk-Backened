@@ -22,9 +22,15 @@ router.post('/password', async (req, res) => {
   if (!user) {
     return res.status(404).json({ success: false, message: 'User not found.' });
   }
+  if(userData.tokenVersion != user.tokenVersion)
+  {
+    return res.status(400).json({ success: false, message: 'Invalid or expired token.' });
+
+  }
 
   const hashedPassword = await bcrypt.hash(password, 10); // Salt rounds = 10
   user.password = hashedPassword;
+  user.tokenVersion +=1
 
   await user.save();
 

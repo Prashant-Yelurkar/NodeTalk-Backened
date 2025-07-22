@@ -67,20 +67,19 @@ const login = async (data, res, isManual) => {
     }
 
     const appJWT = generateAuthToken(user);
-
     if (isNewUser) {
       await welcomeEmail({ to: user.email });
       return res.status(201).json({
         success: true,
-        message: '✅ Registration Successful',
-        jwt: appJWT,
-      });
+        jwt :appJWT ,   
+        meaage: '✅ Registration Successful'},
+      );
     } else {
       await loginEmail({ to: user.email });
       return res.status(200).json({
         success: true,
+        jwt :appJWT ,
         message: '✅ Login Successful',
-        jwt: appJWT,
       });
     }
 

@@ -6,6 +6,7 @@ const generateAuthToken = (user) => {
             id: user._id,
             email: user.email,
             name: user.name,
+            tokenVersion: user.tokenVersion,
         },
         process.env.JWT_SECRET_KEY ,
         { expiresIn: user.expiresIn ||process.env.JWT_EXPIRATION }
