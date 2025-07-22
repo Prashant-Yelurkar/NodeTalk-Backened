@@ -66,7 +66,7 @@ const register = async (data, res, isManual) => {
       await welcomeEmail({ to: user.email });
       return res.status(200).json({
         success: true,
-     
+
         message: '✅ Registration Successful',
         jwt: appJWT,
        

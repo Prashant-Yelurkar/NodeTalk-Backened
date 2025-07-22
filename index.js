@@ -34,9 +34,6 @@ app.use(CORS())
 // Middleware
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the NodeTalk backend!' , status:200, appName: process.env.APP_NAME || 'NodeTalk' , time: new Date().toISOString() });
-});
 
 import authRoute from './auth/authRoute.js';
 import useRoute from './routes/userRoute.js'
@@ -49,6 +46,11 @@ import chatModel from './model/chatModel.js';
 app.use('/auth', authRoute);
 app.use('/user', authenticateToken  ,useRoute )
 app.use('/chat',authenticateToken, chatRoute)
+
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to the NodeTalk backend!' , status:200, appName: process.env.APP_NAME || 'NodeTalk' , time: new Date().toISOString() });
+});
+
 
 const ActiveUser =new  Map();
 io.on('connection', async (socket) => {

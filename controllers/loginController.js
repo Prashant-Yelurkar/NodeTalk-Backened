@@ -69,7 +69,7 @@ const login = async (data, res, isManual) => {
     const appJWT = generateAuthToken(user);
     if (isNewUser) {
       await welcomeEmail({ to: user.email });
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         jwt :appJWT ,   
         meaage: '✅ Registration Successful'},
