@@ -35,7 +35,7 @@ app.use(CORS({
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send('Hello from simple Node.js app!');
+  res.json({ message: 'Welcome to the NodeTalk backend!' , status:200, appName: process.env.APP_NAME || 'NodeTalk' , time: new Date().toISOString() });
 });
 
 
