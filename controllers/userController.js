@@ -20,7 +20,7 @@ const getAllUsers = async (req, res) => {
     };
 
     const users = await User.find(baseQuery)
-      .select('name email profile')
+      .select('name email profile isOnline  lastActive ')
       .skip(skip)
       .limit(limit);
 
@@ -39,6 +39,8 @@ const getAllUsers = async (req, res) => {
               name: user.name,
               email: user.email,
               profile: user.profile,
+              isOnline:user.isOnline ,
+              lastActive: user.lastActive
             }
         };
       })

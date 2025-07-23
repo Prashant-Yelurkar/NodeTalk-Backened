@@ -7,7 +7,7 @@ const getMyChats = async(req, res)=>{
       try {
     const myUserId = req.user.id; 
 
-    const chats = await chatModel.find({ members: myUserId }).select('members');
+    const chats = await chatModel.find({ members: myUserId }).select('members , lastMessage');
 
     const connections = [];
 
@@ -15,10 +15,11 @@ const getMyChats = async(req, res)=>{
       const otherUserId = chat.members.find(id => id.toString() !== myUserId.toString());
       if (!otherUserId) continue;
 
-      const user = await User.findById(otherUserId).select('name email profile');
+      const user = await User.findById(otherUserId).select('name email profile isOnline , lastActive');
       if (user) {
         connections.push({
           chatId: chat._id,
+          lastMessage:chat.lastMessage,
           user,
         });
       }

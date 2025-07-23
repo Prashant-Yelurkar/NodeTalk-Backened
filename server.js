@@ -6,6 +6,17 @@ import { Server as SocketIO } from 'socket.io';
 import http from 'http';
 dotenv.config();
 
+import authRoute from './auth/authRoute.js';
+import useRoute from './routes/userRoute.js'
+import authenticateToken from './auth/authMiddleware.js';
+import chatRoute from './routes/chatRoute.js'
+import { validateToken } from './auth/authController.js';
+import User from './model/userModel.js';
+import chatModel from './model/chatModel.js';
+import uploadRoute from './routes/uploadRoute.js'
+import { connectionFn, disconnectSocketFn, sendMessageFn } from './controllers/socketController.js';
+
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,37 +33,15 @@ const io = new SocketIO(server, {
 
 
 
-
-
-
-// app.use(CORS({
-//   origin:  process.env.NODE_ENV === "development"
-//     ? process.env.APP_PRODUCTION_LINK
-//     : process.env.APP_PRODUCTION_LINK,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-// }));
-
 app.use(CORS())
 
 
 // Middleware
 app.use(express.json());
-
-
-
-import authRoute from './auth/authRoute.js';
-import useRoute from './routes/userRoute.js'
-import authenticateToken from './auth/authMiddleware.js';
-import chatRoute from './routes/chatRoute.js'
-import { validateToken } from './auth/authController.js';
-import User from './model/userModel.js';
-import MessageModal from './model/messsageModel.js';
-import chatModel from './model/chatModel.js';
 app.use('/auth', authRoute);
 app.use('/user', authenticateToken  ,useRoute )
 app.use('/chat',authenticateToken, chatRoute)
-
+app.use('/upload', uploadRoute)
 app.get('/', (req, res) => {
 
   res.json({ message: 'Welcome to the NodeTalk backend!' , status:200, appName: process.env.APP_NAME || 'NodeTalk' , time: new Date().toISOString() });
@@ -66,77 +55,14 @@ io.on('connection', async (socket) => {
     const decodedUser = validateToken(token);
     const user = await User.findOne({ email: decodedUser.email });
     if (!user) return;
+
     ActiveUser.set(decodedUser.id.toString() , socket.id )
-    user.isOnline = true;
-    await user.save();
+    const chats = await chatModel.find({ members: user._id }).select('members');
 
-    console.log(`🔌 User connected: ${socket.id}`);
+    connectionFn(io ,socket, chats, decodedUser,user , ActiveUser)
+    socket.on('sendMessage', data => sendMessageFn(socket, io, ActiveUser, data));
+    socket.on('disconnect', disconnectSocketFn(socket , io, ActiveUser, user, chats));
 
-    socket.on('message', async (data) => {
-        try {
-            const senderId = validateToken(socket.handshake.auth.token).id;
-            const { chatId, userId, message } = data;
-            console.log(userId , senderId);
-    
-
-            let chat;
-
-            if (chatId) {
-                chat = await chatModel.findById(chatId);
-            }
-
-
-            if (!chat) {
-                const members = [senderId, userId].sort(); 
-                chat = await chatModel.findOne({
-                    members: members,
-                    isGroup: false
-                });
-                if (!chat) {
-                    chat = new chatModel({
-                    members: members,
-                    isGroup: false,
-                    lastMessage: message.text
-                    });
-
-                    await chat.save(); 
-                }
-            }
-            
-                chat.lastMessage = message.text;
-                await chat.save();
-
-                const newMessage = new MessageModal({
-                    chatId: chat._id,
-                    sender: senderId,
-                    text: message.text,
-                    type: message.type
-                });
-
-                await newMessage.save();
-                const receiverSocketId = ActiveUser.get(userId);
-                console.log(receiverSocketId);
-                
-                if(receiverSocketId)
-                    {
-                        io.to(receiverSocketId).emit("receiveMessage", {
-                            chatId:chat?._id,
-                            message:{...message, sender:senderId},
-                        });
-                    }
-            } catch (error) {
-                console.error('Message error:', error);
-            }
-            });
-
-
-    socket.on('disconnect', async () => {
-      console.log(`❌ User disconnected: ${socket.id}`);
-      user.isOnline = false;
-      user.lastActive = new Date()
-      await user.save();
-      ActiveUser.delete(user._id.toString());
-    });
 
   } catch (error) {
     console.error('Socket auth error:', error.message);
