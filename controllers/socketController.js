@@ -28,6 +28,8 @@ const connectionFn = async (io , socket, chats, decodedUser,user,  ActiveUser)=>
 
 const sendMessageFn = async (socket , io, ActiveUser, data ) =>{    
     try {
+        console.log(data);
+        
         const senderId = validateToken(socket.handshake.auth.token).id;
         const { chatId, userId, message } = data;
         let chat;
@@ -60,7 +62,8 @@ const sendMessageFn = async (socket , io, ActiveUser, data ) =>{
                 chatId: chat._id,
                 sender: senderId,
                 text: message.text,
-                type: message.type
+                type: message.type,
+                url:message.url? message.url: null
             });
 
             await newMessage.save();

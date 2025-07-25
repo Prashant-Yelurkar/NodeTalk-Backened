@@ -15,7 +15,7 @@ const getMyChats = async(req, res)=>{
       const otherUserId = chat.members.find(id => id.toString() !== myUserId.toString());
       if (!otherUserId) continue;
 
-      const user = await User.findById(otherUserId).select('name email profile isOnline , lastActive');
+      const user = await User.findById(otherUserId).select('name email profile isOnline  lastActive');
       if (user) {
         connections.push({
           chatId: chat._id,

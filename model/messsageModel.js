@@ -19,10 +19,11 @@ const messageSchema = new mongoose.Schema(
       trim: true,
       default: '', 
     },
-    image: {
+    url: {
       type: String, 
       default: null,
     },
+
     type: {
       type: String,
       enum: ['text', 'image', 'text+image'],

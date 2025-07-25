@@ -31,7 +31,6 @@ const userSchema = new Schema({
     },
     profile:{
         type: String,
-        default: 'https://res.cloudinary.com/dz3qj1x8h/image/upload/v1698851234/default-profile-picture.png'
     },
     tokenVersion: { type: Number, default: 0 },
     createdAt: {
