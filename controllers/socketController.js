@@ -1,6 +1,7 @@
 import { validateToken } from "../auth/authController.js";
 import chatModel from "../model/chatModel.js";
 import MessageModal from "../model/messsageModel.js";
+import cloudinary from "../utils/cloudinaryConfig.js";
 
 const connectionFn = async (io , socket, chats, decodedUser,user,  ActiveUser)=>{
     try{
@@ -26,10 +27,8 @@ const connectionFn = async (io , socket, chats, decodedUser,user,  ActiveUser)=>
 }
 
 
-const sendMessageFn = async (socket , io, ActiveUser, data ) =>{    
-    try {
-        console.log(data);
-        
+const sendMessageFn = async (socket , io, ActiveUser, data ) =>{        
+    try {        
         const senderId = validateToken(socket.handshake.auth.token).id;
         const { chatId, userId, message } = data;
         let chat;
@@ -54,6 +53,13 @@ const sendMessageFn = async (socket , io, ActiveUser, data ) =>{
                 await chat.save(); 
             }
         }
+        let result = null
+        if(message.file)
+        result = await cloudinary.uploader.upload(message.file,{
+                folder: 'NodeTalk', // optional
+                resource_type: 'auto'       
+            })
+
         
             chat.lastMessage = message.text;
             await chat.save();
@@ -63,16 +69,28 @@ const sendMessageFn = async (socket , io, ActiveUser, data ) =>{
                 sender: senderId,
                 text: message.text,
                 type: message.type,
-                url:message.url? message.url: null
+                url:message.file? result.secure_url: result,
+                fileName:message.file? message.fileName:null,
+                mimeType:message.file? message.mimeType:null,
             });
 
+            let sendData ={
+                sender: senderId,
+                text: message.text,
+                type: message.type,
+                url:message.file? result.secure_url: result,
+                fileName:message.file? message.fileName:null,
+                mimeType:message.file? message.mimeType:null,
+                createdAt: new Date()
+
+            }
             await newMessage.save();
             const receiverSocketId = ActiveUser.get(userId);            
             if(receiverSocketId)
                 {
                     io.to(receiverSocketId).emit("receiveMessage", {
                         chatId:chat?._id,
-                        message:{...message, sender:senderId},
+                        message:{...sendData},
                     });
                 }
     } catch (error) {

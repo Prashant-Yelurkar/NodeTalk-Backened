@@ -1,5 +1,3 @@
-// models/Message.js
-
 import mongoose from 'mongoose';
 
 const messageSchema = new mongoose.Schema(
@@ -17,24 +15,55 @@ const messageSchema = new mongoose.Schema(
     text: {
       type: String,
       trim: true,
-      default: '', 
+      default: '',
     },
     url: {
-      type: String, 
+      type: String,
       default: null,
     },
-
+    fileName: {
+      type: String,
+      default: null,
+      validate: {
+        validator: function (v) {
+          // Only required if url exists
+          if (this.url) return !!v;
+          return true;
+        },
+        message: 'fileName is required when file URL is present',
+      },
+    },
+    mimeType: {
+      type: String,
+      default: null,
+      validate: {
+        validator: function (v) {
+          if (this.url) return !!v;
+          return true;
+        },
+        message: 'mimeType is required when file URL is present',
+      },
+    },
+    // fileSize: {
+    //   type: Number,
+    //   default: null,
+    //   validate: {
+    //     validator: function (v) {
+    //       if (this.url) return v != null;
+    //       return true;
+    //     },
+    //     message: 'fileSize is required when file URL is present',
+    //   },
+    // },
     type: {
       type: String,
-      enum: ['text', 'image', 'text+image'],
       default: 'text',
-    }
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const MessageModal = mongoose.model('Message', messageSchema);
-
-export default MessageModal;
+const MessageModel = mongoose.model('Message', messageSchema);
+export default MessageModel;
